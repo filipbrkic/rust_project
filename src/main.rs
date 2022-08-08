@@ -1,51 +1,35 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{App, HttpServer};
+use diesel::{PgConnection, Connection};
+use dotenv::dotenv;
+use std::env::{self};
 
-pub struct VehicleBrands {
-    pub id: i32,
-    pub name: String,
-    pub description: String,
-}
+#[macro_use]
+extern crate diesel;
+extern crate dotenv;
+pub mod models;
+pub mod schema;
+pub mod brand_handlers;
+use crate::brand_handlers::*;
 
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
-}
+pub fn establish_connection() -> PgConnection {
+    dotenv().ok();
 
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    let id_part: Vec<&str> = req_body.split("\"id\"").collect();
-    let id_part = id_part[1].trim_start();
-    let id_part: Vec<&str> = id_part.split("\n--------").collect();
-    let id_part = id_part[0].trim_end();
-    
-    let name_part: Vec<&str> = req_body.split("\"name\"").collect();
-    let name_part = name_part[1].trim_start();
-    let name_part: Vec<&str> = name_part.split("\n--------").collect();
-    let name_part = name_part[0].trim_end();
-
-    let description_part: Vec<&str> = req_body.split("\"description\"").collect();
-    let description_part = description_part[1].trim_start();
-    let description_part: Vec<&str> = description_part.split("\n--------").collect();
-    let description_part = description_part[0].trim_end();
-
-    println!("{id_part:?}");
-    println!("{name_part:?}");
-    println!("{description_part:?}");
-
-    HttpResponse::Ok().body(req_body)
-}
-
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
+    let database_url = env::var("DATABASE_URL")
+        .expect("DATABASE_URL must be set");
+    PgConnection::establish(&database_url)
+        .expect(&format!("Error connecting to {}", database_url))
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+
     HttpServer::new(|| {
         App::new()
-            .service(hello)
-            .service(echo)
-            .route("/hey", web::get().to(manual_hello))
+            .service(get_vehicle_brands_by_id)
+            .service(get_vehicle_brands)
+            .service(post_vehicle_brand)
+            .service(delete_vehicle_brand)
+            .service(update_vehicle_brands)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
