@@ -8,12 +8,13 @@ extern crate diesel;
 extern crate dotenv;
 pub mod models;
 pub mod schema;
-pub mod brand_handlers;
-pub mod owners_handlers;
 pub mod models_handlers;
-use crate::brand_handlers::*;
-use crate::owners_handlers::*;
+pub mod owners_handlers;
+pub mod brands_handlers;
+mod tests;
 use crate::models_handlers::*;
+use crate::owners_handlers::*;
+use crate::brands_handlers::*;
 
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
@@ -26,7 +27,6 @@ pub fn establish_connection() -> PgConnection {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-
     HttpServer::new(|| {
         App::new()
             .service(get_vehicle_brands_by_id)

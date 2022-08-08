@@ -1,21 +1,21 @@
 use crate::diesel::RunQueryDsl;
 use crate::{schema, establish_connection};
-use crate::models::{NewVehicleBrand, VehicleBrands};
+use crate::models::{NewVehicleModels, VehicleModels};
 use actix_web::{get, post, HttpResponse, Responder, delete, put, web};
 
-#[get("/brands/{id}")]
-pub async fn get_vehicle_brands_by_id(path: web::Path<u32>) -> impl Responder {
+#[get("/models/{id}")]
+pub async fn get_vehicle_models_by_id(path: web::Path<u32>) -> impl Responder {
     let connection = establish_connection();
 
-    use crate::schema::vehicle_brands::dsl::vehicle_brands;
+    use crate::schema::vehicle_models::dsl::vehicle_models;
     use crate::diesel::QueryDsl;
 
     let path_to_string = &path.into_inner().to_string();
     let id = &path_to_string.parse::<i32>().unwrap();
 
-    let results = vehicle_brands.find(id)
-        .load::<VehicleBrands>(&connection)
-        .expect("Error getting vehicle brand by ID");
+    let results = vehicle_models.find(id)
+        .load::<VehicleModels>(&connection)
+        .expect("Error getting vehicle model by ID");
 
     let serialized = serde_json::to_string(&results).unwrap();
 
@@ -26,21 +26,21 @@ pub async fn get_vehicle_brands_by_id(path: web::Path<u32>) -> impl Responder {
     }
 }
 
-#[get("/brands")]
-pub async fn get_vehicle_brands() -> impl Responder {
+#[get("/models")]
+pub async fn get_vehicle_models() -> impl Responder {
     let connection = establish_connection();
 
-    use crate::schema::vehicle_brands::dsl::vehicle_brands;
+    use crate::schema::vehicle_models::dsl::vehicle_models;
 
-    let results = vehicle_brands
-        .load::<VehicleBrands>(&connection)
-        .expect("Error loading vehicle brands!");
+    let results = vehicle_models
+        .load::<VehicleModels>(&connection)
+        .expect("Error loading vehicle models!");
     let serialized = serde_json::to_string(&results).unwrap();
     HttpResponse::Ok().body(serialized)
 }
 
-#[post("/brands")]
-pub async fn post_vehicle_brand(req_body: String) -> impl Responder {
+#[post("/models")]
+pub async fn post_vehicle_model(req_body: String) -> impl Responder {
     let connection = establish_connection();
 
     let id_part: Vec<&str> = req_body.split("\"id\"").collect();
@@ -58,25 +58,25 @@ pub async fn post_vehicle_brand(req_body: String) -> impl Responder {
     let description_part: Vec<&str> = description_part.split("\n--------").collect();
     let description_part = description_part[0].trim_end();
 
-    let new_vehicle = NewVehicleBrand {
+    let new_vehicle = NewVehicleModels {
         id: &id_part.parse::<i32>().unwrap(),
         name: &name_part.to_string(),
         description: &description_part.to_string()
     };
 
-    use schema::vehicle_brands;
+    use schema::vehicle_models;
 
-    let create_vehicle_brand = diesel::insert_into(vehicle_brands::table)
+    let create_vehicle_model = diesel::insert_into(vehicle_models::table)
         .values(&new_vehicle)
-        .get_result::<VehicleBrands>(&connection)
+        .get_result::<VehicleModels>(&connection)
         .expect("Error saving new vehicle");
 
-    let serialized = serde_json::to_string(&create_vehicle_brand).unwrap();
+    let serialized = serde_json::to_string(&create_vehicle_model).unwrap();
     HttpResponse::Ok().body(serialized)
 }
 
-#[put("/brands")]
-pub async fn update_vehicle_brands(req_body: String) -> impl Responder {
+#[put("/models")]
+pub async fn update_vehicle_models(req_body: String) -> impl Responder {
     let connection = establish_connection();
 
     let id_part: Vec<&str> = req_body.split("\"id\"").collect();
@@ -94,10 +94,10 @@ pub async fn update_vehicle_brands(req_body: String) -> impl Responder {
     let description_part: Vec<&str> = description_part.split("\n--------").collect();
     let description_part = description_part[0].trim_end();
     
-    use crate::schema::vehicle_brands::dsl::vehicle_brands;
+    use crate::schema::vehicle_models::dsl::vehicle_models;
     use crate::diesel::QueryDsl;
 
-    let new_vehicle = NewVehicleBrand {
+    let new_vehicle = NewVehicleModels {
         id: &id_part.parse::<i32>().unwrap(),
         name: &name_part.to_string(),
         description: &description_part.to_string()
@@ -105,30 +105,30 @@ pub async fn update_vehicle_brands(req_body: String) -> impl Responder {
 
     let id = &id_part.parse::<i32>().unwrap();
 
-    let update_vehicle_brands = diesel::update(vehicle_brands.find(id))
+    let update_vehicle_models = diesel::update(vehicle_models.find(id))
         .set(&new_vehicle)
-        .get_result::<VehicleBrands>(&connection)
-        .expect(&format!("Unable to find vehicle brand with id: {}", id));
+        .get_result::<VehicleModels>(&connection)
+        .expect(&format!("Unable to find vehicle model with id: {}", id));
 
-    let serialized = serde_json::to_string(&update_vehicle_brands).unwrap();
+    let serialized = serde_json::to_string(&update_vehicle_models).unwrap();
     HttpResponse::Ok().body(serialized)
 }
 
-#[delete("/brands/{id}")]
-pub async fn delete_vehicle_brand(path: web::Path<u32>) -> impl Responder {
+#[delete("/models/{id}")]
+pub async fn delete_vehicle_model(path: web::Path<u32>) -> impl Responder {
 
     let connection = establish_connection();
 
     let path_to_string = &path.into_inner().to_string();
     let id = &path_to_string.parse::<i32>().unwrap();
     
-    use crate::schema::vehicle_brands::dsl::vehicle_brands;
+    use crate::schema::vehicle_models::dsl::vehicle_models;
     use crate::diesel::QueryDsl;
-    let brand_deleted = diesel::delete(vehicle_brands.find(id))
+    let model_deleted = diesel::delete(vehicle_models.find(id))
         .execute(&connection)
-        .expect("Error deleting vehicle brand!");
+        .expect("Error deleting vehicle model!");
 
-    let serialized = serde_json::to_string(&brand_deleted).unwrap();
+    let serialized = serde_json::to_string(&model_deleted).unwrap();
     let result = serialized.parse::<i32>().unwrap();
     if result == 1{
         HttpResponse::Ok()
