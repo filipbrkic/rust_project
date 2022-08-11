@@ -1,7 +1,7 @@
 use actix_web::{App, HttpServer};
 use diesel::{PgConnection, Connection};
 use dotenv::dotenv;
-use std::env::{self};
+use std::env;
 
 #[macro_use]
 extern crate diesel;
@@ -11,7 +11,7 @@ pub mod schema;
 pub mod models_handlers;
 pub mod owners_handlers;
 pub mod brands_handlers;
-mod tests;
+mod brands_test;
 use crate::models_handlers::*;
 use crate::owners_handlers::*;
 use crate::brands_handlers::*;
@@ -36,8 +36,8 @@ async fn main() -> std::io::Result<()> {
             .service(update_vehicle_brands)
 
             .service(get_owners_by_id)
-            .service(post_owners)
             .service(get_owners)
+            .service(post_owners)
             .service(update_owners)
             .service(delete_owners)
 

@@ -1,5 +1,5 @@
 use crate::diesel::RunQueryDsl;
-use crate::{establish_connection};
+use crate::establish_connection;
 use crate::models::{NewVehicleBrand, VehicleBrands};
 use actix_web::{get, post, HttpResponse, Responder, delete, put, web};
 
