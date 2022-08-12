@@ -1,6 +1,7 @@
 use actix_web::{App, HttpServer};
 use diesel::{PgConnection, Connection};
 use dotenv::dotenv;
+use handlers::*;
 use std::env;
 
 #[macro_use]
@@ -8,13 +9,8 @@ extern crate diesel;
 extern crate dotenv;
 pub mod models;
 pub mod schema;
-pub mod models_handlers;
-pub mod owners_handlers;
-pub mod brands_handlers;
-mod brands_test;
-use crate::models_handlers::*;
-use crate::owners_handlers::*;
-use crate::brands_handlers::*;
+mod handlers;
+mod vehicle_tests;
 
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
