@@ -2,6 +2,7 @@ use crate::diesel::RunQueryDsl;
 use crate::{schema, establish_connection};
 use crate::models::{NewOwners, Owners};
 use actix_web::{get, post, HttpResponse, Responder, delete, put, web};
+use rand::Rng;
 
 #[get("/owners/{id}")]
 pub async fn get_owners_by_id(path: web::Path<u32>) -> impl Responder {
@@ -44,23 +45,20 @@ pub async fn get_owners() -> impl Responder {
 pub async fn post_owners(req_body: String) -> impl Responder {
     let connection = establish_connection();
 
-    let id_part: Vec<&str> = req_body.split("\"id\"").collect();
-    let id_part = id_part[1].trim_start();
-    let id_part: Vec<&str> = id_part.split("\n--------").collect();
-    let id_part = id_part[0].trim_end();
-
     let first_name_part: Vec<&str> = req_body.split("\"first_name\"").collect();
     let first_name_part = first_name_part[1].trim_start();
-    let first_name_part: Vec<&str> = first_name_part.split("\n--------").collect();
+    let first_name_part: Vec<&str> = first_name_part.split("\n----").collect();
     let first_name_part = first_name_part[0].trim_end();
 
     let last_name_part: Vec<&str> = req_body.split("\"last_name\"").collect();
     let last_name_part = last_name_part[1].trim_start();
-    let last_name_part: Vec<&str> = last_name_part.split("\n--------").collect();
+    let last_name_part: Vec<&str> = last_name_part.split("\n----").collect();
     let last_name_part = last_name_part[0].trim_end();
 
+    let id = rand::thread_rng().gen_range(0..1000000);
+
     let new_owners = NewOwners {
-        id: &id_part.parse::<i32>().unwrap(),
+        id: &id,
         first_name: &first_name_part.to_string(),
         last_name: &last_name_part.to_string()
     };
