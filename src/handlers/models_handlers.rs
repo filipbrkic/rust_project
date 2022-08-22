@@ -2,6 +2,7 @@ use crate::diesel::RunQueryDsl;
 use crate::{schema, establish_connection};
 use crate::models::{NewVehicleModels, VehicleModels};
 use actix_web::{get, post, HttpResponse, Responder, delete, put, web};
+use rand::Rng;
 
 #[get("/models/{id}")]
 pub async fn get_vehicle_models_by_id(path: web::Path<u32>) -> impl Responder {
@@ -43,23 +44,20 @@ pub async fn get_vehicle_models() -> impl Responder {
 pub async fn post_vehicle_model(req_body: String) -> impl Responder {
     let connection = establish_connection();
 
-    let id_part: Vec<&str> = req_body.split("\"id\"").collect();
-    let id_part = id_part[1].trim_start();
-    let id_part: Vec<&str> = id_part.split("\n--------").collect();
-    let id_part = id_part[0].trim_end();
-    
     let name_part: Vec<&str> = req_body.split("\"name\"").collect();
     let name_part = name_part[1].trim_start();
-    let name_part: Vec<&str> = name_part.split("\n--------").collect();
+    let name_part: Vec<&str> = name_part.split("\n----").collect();
     let name_part = name_part[0].trim_end();
 
     let description_part: Vec<&str> = req_body.split("\"description\"").collect();
     let description_part = description_part[1].trim_start();
-    let description_part: Vec<&str> = description_part.split("\n--------").collect();
+    let description_part: Vec<&str> = description_part.split("\n----").collect();
     let description_part = description_part[0].trim_end();
 
+    let id = rand::thread_rng().gen_range(0..1000000);
+
     let new_vehicle = NewVehicleModels {
-        id: &id_part.parse::<i32>().unwrap(),
+        id: &id,
         name: &name_part.to_string(),
         description: &description_part.to_string()
     };
