@@ -83,12 +83,12 @@ pub async fn update_vehicle_brands(req_body: String) -> impl Responder {
     
     let name_part: Vec<&str> = req_body.split("\"name\"").collect();
     let name_part = name_part[1].trim_start();
-    let name_part: Vec<&str> = name_part.split("\n--------").collect();
+    let name_part: Vec<&str> = name_part.split("\n----").collect();
     let name_part = name_part[0].trim_end();
 
     let description_part: Vec<&str> = req_body.split("\"description\"").collect();
     let description_part = description_part[1].trim_start();
-    let description_part: Vec<&str> = description_part.split("\n--------").collect();
+    let description_part: Vec<&str> = description_part.split("\n----").collect();
     let description_part = description_part[0].trim_end();
     
     use crate::schema::vehicle_brands::dsl::vehicle_brands;
