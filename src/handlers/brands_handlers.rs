@@ -54,8 +54,7 @@ pub async fn post_vehicle_brand(req_body: String) -> impl Responder {
     let description_part: Vec<&str> = description_part.split("\n----").collect();
     let description_part = description_part[0].trim_end();
 
-    let mut rng = rand::thread_rng();
-    let id = rng.gen::<i32>();
+    let id = rand::thread_rng().gen_range(0..1000000);
 
     let new_vehicle = NewVehicleBrand {
         id: &id,

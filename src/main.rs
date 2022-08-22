@@ -24,7 +24,7 @@ pub fn establish_connection() -> PgConnection {
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         let cors = Cors::default()
-            .allowed_origin("http://10.160.100.18:8081")
+            .allowed_origin("http://localhost:8081")
             .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
             .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
             .allowed_header(http::header::CONTENT_TYPE)
