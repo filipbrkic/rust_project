@@ -1,4 +1,4 @@
-use actix_web::{App, HttpServer, http};
+use actix_web::{App, HttpServer};
 use diesel::{Connection, PgConnection};
 use dotenv::dotenv;
 use handlers::*;
@@ -23,12 +23,7 @@ pub fn establish_connection() -> PgConnection {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
-        let cors = Cors::default()
-            .allowed_origin("http://localhost:8081")
-            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
-            .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
-            .allowed_header(http::header::CONTENT_TYPE)
-            .max_age(3600);
+        let cors = Cors::permissive();
 
         App::new()
             .wrap(cors)

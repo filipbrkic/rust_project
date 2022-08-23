@@ -79,17 +79,17 @@ pub async fn update_vehicle_models(req_body: String) -> impl Responder {
 
     let id_part: Vec<&str> = req_body.split("\"id\"").collect();
     let id_part = id_part[1].trim_start();
-    let id_part: Vec<&str> = id_part.split("\n--------").collect();
+    let id_part: Vec<&str> = id_part.split("\n----").collect();
     let id_part = id_part[0].trim_end();
     
     let name_part: Vec<&str> = req_body.split("\"name\"").collect();
     let name_part = name_part[1].trim_start();
-    let name_part: Vec<&str> = name_part.split("\n--------").collect();
+    let name_part: Vec<&str> = name_part.split("\n----").collect();
     let name_part = name_part[0].trim_end();
 
     let description_part: Vec<&str> = req_body.split("\"description\"").collect();
     let description_part = description_part[1].trim_start();
-    let description_part: Vec<&str> = description_part.split("\n--------").collect();
+    let description_part: Vec<&str> = description_part.split("\n----").collect();
     let description_part = description_part[0].trim_end();
     
     use crate::schema::vehicle_models::dsl::vehicle_models;

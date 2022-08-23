@@ -80,17 +80,17 @@ pub async fn update_owners(req_body: String) -> impl Responder {
 
     let id_part: Vec<&str> = req_body.split("\"id\"").collect();
     let id_part = id_part[1].trim_start();
-    let id_part: Vec<&str> = id_part.split("\n--------").collect();
+    let id_part: Vec<&str> = id_part.split("\n----").collect();
     let id_part = id_part[0].trim_end();
 
     let first_name_part: Vec<&str> = req_body.split("\"first_name\"").collect();
     let first_name_part = first_name_part[1].trim_start();
-    let first_name_part: Vec<&str> = first_name_part.split("\n--------").collect();
+    let first_name_part: Vec<&str> = first_name_part.split("\n----").collect();
     let first_name_part = first_name_part[0].trim_end();
 
     let last_name_part: Vec<&str> = req_body.split("\"last_name\"").collect();
     let last_name_part = last_name_part[1].trim_start();
-    let last_name_part: Vec<&str> = last_name_part.split("\n--------").collect();
+    let last_name_part: Vec<&str> = last_name_part.split("\n----").collect();
     let last_name_part = last_name_part[0].trim_end();
 
     let new_owners = NewOwners {
