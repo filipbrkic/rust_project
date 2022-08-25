@@ -85,7 +85,7 @@ mod tests {
         let app = test::init_service(App::new()
             .service(get_owners_by_id)).await;
 
-        let req = test::TestRequest::with_uri("/owners/111111").to_request();
+        let req = test::TestRequest::with_uri("/owners/1234567").to_request();
         let res = app.call(req).await.unwrap();
         assert_eq!(res.status(), StatusCode::NOT_FOUND);
     }

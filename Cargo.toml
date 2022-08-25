@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4"
-diesel = { version = "1.4.4", features = ["postgres", "r2d2"] }
+diesel = {git="https://github.com/diesel-rs/diesel", features = ["postgres", "r2d2"]}
 dotenv = "0.15.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
@@ -17,3 +17,4 @@ cargo-watch = "8.1.2"
 actix-cors = "0.6.2"
 nanoid = "0.4.0"
 rand = "0.8.5"
+derive_more = "0.99.17"

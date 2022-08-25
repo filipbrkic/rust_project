@@ -1,10 +1,9 @@
-use actix_web::{App, HttpServer};
-use diesel::{Connection, PgConnection};
-use dotenv::dotenv;
+use actix_cors::Cors;
+use actix_web::{App, HttpServer, web};
+use diesel::{r2d2::{ConnectionManager, self}, PgConnection};
 use handlers::*;
 use std::env;
-use actix_cors::Cors;
-
+use dotenv::dotenv;
 #[macro_use]
 extern crate diesel;
 extern crate dotenv;
@@ -13,20 +12,24 @@ pub mod models;
 pub mod schema;
 mod vehicle_tests;
 
-pub fn establish_connection() -> PgConnection {
-    dotenv().ok();
-
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
-}
+type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
+    dotenv().ok();
+
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let manager = ConnectionManager::<PgConnection>::new(database_url);
+    let pool = r2d2::Pool::builder()
+        .build(manager)
+        .expect("Failed to create pool.");
+
+    HttpServer::new(move || {
         let cors = Cors::permissive();
 
         App::new()
             .wrap(cors)
+            .app_data(web::Data::new(pool.clone()))
             .service(get_vehicle_brands_by_id)
             .service(get_vehicle_brands)
             .service(post_vehicle_brand)
