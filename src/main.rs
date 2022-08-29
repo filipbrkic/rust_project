@@ -1,16 +1,19 @@
 use actix_cors::Cors;
-use actix_web::{App, HttpServer, web};
-use diesel::{r2d2::{ConnectionManager, self}, PgConnection};
+use actix_web::{web, App, HttpServer};
+use diesel::{
+    r2d2::{self, ConnectionManager},
+    PgConnection,
+};
+use dotenv::dotenv;
 use handlers::*;
 use std::env;
-use dotenv::dotenv;
 #[macro_use]
 extern crate diesel;
 extern crate dotenv;
 mod handlers;
 pub mod models;
 pub mod schema;
-mod vehicle_tests;
+mod tests;
 
 type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
@@ -19,11 +22,14 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    println!("1");
     let manager = ConnectionManager::<PgConnection>::new(database_url);
+    println!("2");
     let pool = r2d2::Pool::builder()
         .build(manager)
         .expect("Failed to create pool.");
-
+    println!("Server started");
+    
     HttpServer::new(move || {
         let cors = Cors::permissive();
 

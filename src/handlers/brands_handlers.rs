@@ -1,5 +1,5 @@
 use crate::diesel::RunQueryDsl;
-use crate::models::{MyError, NewBrand, NewVehicleBrand, VehicleBrands};
+use crate::models::{NewBrand, NewVehicleBrand, VehicleBrands};
 use crate::{schema, DbPool};
 use actix_web::{delete, get, post, put, web, Error, HttpResponse, Responder};
 
@@ -7,7 +7,7 @@ use actix_web::{delete, get, post, put, web, Error, HttpResponse, Responder};
 pub async fn get_vehicle_brands_by_id(
     pool: web::Data<DbPool>,
     path: web::Path<u32>,
-) -> Result<impl Responder, MyError> {
+) -> Result<impl Responder, Error> {
     let mut connection = pool.get().expect("Couldn't get db connection from pool");
 
     use crate::diesel::QueryDsl;
@@ -19,19 +19,17 @@ pub async fn get_vehicle_brands_by_id(
     let results = vehicle_brands
         .find(id)
         .load::<VehicleBrands>(&mut connection)
-        .expect("Error getting vehicle brand by ID");
+        .expect("Error getting vehicle brand by ID!");
 
     if results.len() == 0 {
-        Err(MyError {
-            name: "Error getting vehicle brand by ID",
-        })
+        Ok(HttpResponse::NotFound().body("Error getting vehicle brand by ID!"))
     } else {
         Ok(HttpResponse::Ok().json(results))
     }
 }
 
 #[get("/brands")]
-pub async fn get_vehicle_brands(pool: web::Data<DbPool>) -> Result<impl Responder, MyError> {
+pub async fn get_vehicle_brands(pool: web::Data<DbPool>) -> Result<impl Responder, Error> {
     let mut connection = pool.get().expect("Couldn't get db connection from pool");
 
     use crate::schema::vehicle_brands::dsl::vehicle_brands;
@@ -41,9 +39,7 @@ pub async fn get_vehicle_brands(pool: web::Data<DbPool>) -> Result<impl Responde
         .expect("Error loading vehicle brands!");
 
     if results.len() == 0 {
-        Err(MyError {
-            name: "Error loading vehicle brands!",
-        })
+        Ok(HttpResponse::NoContent().body("Vehicle brand database is empty!"))
     } else {
         Ok(HttpResponse::Ok().json(results))
     }
@@ -67,7 +63,7 @@ pub async fn post_vehicle_brand(
         .get_result::<VehicleBrands>(&mut connection)
         .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    Ok(HttpResponse::Ok().json(result))
+    Ok(HttpResponse::Created().json(result))
 }
 
 #[put("/brands/{id}")]
@@ -75,7 +71,7 @@ pub async fn update_vehicle_brands(
     path: web::Path<u32>,
     info: web::Json<NewBrand>,
     pool: web::Data<DbPool>,
-) -> Result<impl Responder, MyError> {
+) -> Result<impl Responder, Error> {
     let mut connection = pool.get().expect("Couldn't get db connection from pool");
 
     use crate::diesel::QueryDsl;
@@ -91,23 +87,20 @@ pub async fn update_vehicle_brands(
 
     let result = diesel::update(vehicle_brands.find(id))
         .set(&new_vehicle)
-        .get_result::<VehicleBrands>(&mut connection)
-        .expect(&format!("Unable to find vehicle brand with id: {}", id));
+        .get_result::<VehicleBrands>(&mut connection);
 
-    if info.name.len() == 0 || info.description.len() == 0 {
-        Err(MyError {
-            name: "Error updating vehicle brand",
-        })
+    if result.is_ok() {
+        return Ok(HttpResponse::Ok().json(result.unwrap()));
     } else {
-        Ok(HttpResponse::Ok().json(result))
+        return Ok(HttpResponse::NotFound().body(format!("Brand with id {id} is not found")));
     }
 }
 
 #[delete("/brands/{id}")]
 pub async fn delete_vehicle_brand(
-    path: web::Path<u32>,
     pool: web::Data<DbPool>,
-) -> Result<impl Responder, MyError> {
+    path: web::Path<u32>,
+) -> Result<impl Responder, Error> {
     let mut connection = pool.get().expect("Couldn't get db connection from pool");
 
     let path_to_string = &path.into_inner().to_string();
@@ -123,8 +116,6 @@ pub async fn delete_vehicle_brand(
     if result == 1 {
         Ok(HttpResponse::Ok())
     } else {
-        Err(MyError {
-            name: "Error deleting vehicle brand",
-        })
+        Ok(HttpResponse::NotFound())
     }
 }

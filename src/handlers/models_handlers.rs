@@ -1,13 +1,13 @@
 use crate::diesel::RunQueryDsl;
 use crate::models::{NewModel, NewVehicleModels, VehicleModels};
 use crate::{schema, DbPool};
-use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
+use actix_web::{delete, get, post, put, web, Error, HttpResponse, Responder};
 
 #[get("/models/{id}")]
 pub async fn get_vehicle_models_by_id(
     path: web::Path<u32>,
     pool: web::Data<DbPool>,
-) -> impl Responder {
+) -> Result<impl Responder, Error> {
     let mut connection = pool.get().expect("Couldn't get db connection from pool");
 
     use crate::diesel::QueryDsl;
@@ -22,14 +22,14 @@ pub async fn get_vehicle_models_by_id(
         .expect("Error getting vehicle model by ID");
 
     if results.len() == 0 {
-        HttpResponse::NotFound().json(results)
+        Ok(HttpResponse::NotFound().body("Vehicle model database is empty!"))
     } else {
-        HttpResponse::Ok().json(results)
+        Ok(HttpResponse::Ok().json(results))
     }
 }
 
 #[get("/models")]
-pub async fn get_vehicle_models(pool: web::Data<DbPool>) -> impl Responder {
+pub async fn get_vehicle_models(pool: web::Data<DbPool>) -> Result<impl Responder, Error> {
     let mut connection = pool.get().expect("Couldn't get db connection from pool");
 
     use crate::schema::vehicle_models::dsl::vehicle_models;
@@ -39,9 +39,9 @@ pub async fn get_vehicle_models(pool: web::Data<DbPool>) -> impl Responder {
         .expect("Error loading vehicle models!");
 
     if results.len() == 0 {
-        HttpResponse::NotFound().json(results)
+        Ok(HttpResponse::NotFound().body("Error loading vehicle models!"))
     } else {
-        HttpResponse::Ok().json(results)
+        Ok(HttpResponse::Ok().json(results))
     }
 }
 
@@ -49,7 +49,7 @@ pub async fn get_vehicle_models(pool: web::Data<DbPool>) -> impl Responder {
 pub async fn post_vehicle_model(
     info: web::Json<NewModel>,
     pool: web::Data<DbPool>,
-) -> impl Responder {
+) -> Result<impl Responder, Error> {
     let mut connection = pool.get().expect("Couldn't get db connection from pool");
 
     let new_vehicle = NewVehicleModels {
@@ -62,9 +62,9 @@ pub async fn post_vehicle_model(
     let result = diesel::insert_into(vehicle_models::table)
         .values(&new_vehicle)
         .get_result::<VehicleModels>(&mut connection)
-        .expect("Error saving new vehicle");
+        .expect("Error saving new vehicle model");
 
-    HttpResponse::Ok().json(result)
+    Ok(HttpResponse::Created().json(result))
 }
 
 #[put("/models/{id}")]
@@ -72,7 +72,7 @@ pub async fn update_vehicle_models(
     path: web::Path<u32>,
     info: web::Json<NewModel>,
     pool: web::Data<DbPool>,
-) -> impl Responder {
+) -> Result<impl Responder, Error> {
     let mut connection = pool.get().expect("Couldn't get db connection from pool");
 
     use crate::diesel::QueryDsl;
@@ -88,14 +88,20 @@ pub async fn update_vehicle_models(
 
     let result = diesel::update(vehicle_models.find(id))
         .set(&new_vehicle)
-        .get_result::<VehicleModels>(&mut connection)
-        .expect(&format!("Unable to find vehicle model with id: {}", id));
+        .get_result::<VehicleModels>(&mut connection);
 
-    HttpResponse::Ok().json(result)
+    if result.is_ok() {
+        return Ok(HttpResponse::Ok().json(result.unwrap()));
+    } else {
+        return Ok(HttpResponse::NotFound().body(format!("Model with id {id} is not found")));
+    }
 }
 
 #[delete("/models/{id}")]
-pub async fn delete_vehicle_model(path: web::Path<u32>, pool: web::Data<DbPool>) -> impl Responder {
+pub async fn delete_vehicle_model(
+    path: web::Path<u32>,
+    pool: web::Data<DbPool>,
+) -> Result<impl Responder, Error> {
     let mut connection = pool.get().expect("Couldn't get db connection from pool");
 
     let path_to_string = &path.into_inner().to_string();
@@ -108,8 +114,8 @@ pub async fn delete_vehicle_model(path: web::Path<u32>, pool: web::Data<DbPool>)
         .expect("Error deleting vehicle model!");
 
     if result == 1 {
-        HttpResponse::Ok()
+        Ok(HttpResponse::Ok())
     } else {
-        HttpResponse::NotFound()
+        Ok(HttpResponse::NotFound())
     }
 }
