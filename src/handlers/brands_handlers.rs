@@ -8,7 +8,7 @@ pub async fn get_vehicle_brands_by_id(
     pool: web::Data<DbPool>,
     path: web::Path<u32>,
 ) -> Result<impl Responder, Error> {
-    let mut connection = pool.get().expect("Couldn't get db connection from pool");
+    let mut connection = pool.get().unwrap();
 
     use crate::diesel::QueryDsl;
     use crate::schema::vehicle_brands::dsl::vehicle_brands;
@@ -30,7 +30,7 @@ pub async fn get_vehicle_brands_by_id(
 
 #[get("/brands")]
 pub async fn get_vehicle_brands(pool: web::Data<DbPool>) -> Result<impl Responder, Error> {
-    let mut connection = pool.get().expect("Couldn't get db connection from pool");
+    let mut connection = pool.get().unwrap();
 
     use crate::schema::vehicle_brands::dsl::vehicle_brands;
 
@@ -50,7 +50,7 @@ pub async fn post_vehicle_brand(
     pool: web::Data<DbPool>,
     info: web::Json<NewBrand>,
 ) -> Result<impl Responder, Error> {
-    let mut connection = pool.get().expect("Couldn't get db connection from pool");
+    let mut connection = pool.get().unwrap();
 
     let new_vehicle = NewVehicleBrand {
         name: &info.name,
@@ -72,7 +72,7 @@ pub async fn update_vehicle_brands(
     info: web::Json<NewBrand>,
     pool: web::Data<DbPool>,
 ) -> Result<impl Responder, Error> {
-    let mut connection = pool.get().expect("Couldn't get db connection from pool");
+    let mut connection = pool.get().unwrap();
 
     use crate::diesel::QueryDsl;
     use crate::schema::vehicle_brands::dsl::vehicle_brands;
@@ -101,7 +101,7 @@ pub async fn delete_vehicle_brand(
     pool: web::Data<DbPool>,
     path: web::Path<u32>,
 ) -> Result<impl Responder, Error> {
-    let mut connection = pool.get().expect("Couldn't get db connection from pool");
+    let mut connection = pool.get().unwrap();
 
     let path_to_string = &path.into_inner().to_string();
     let id = &path_to_string.parse::<i32>().unwrap();

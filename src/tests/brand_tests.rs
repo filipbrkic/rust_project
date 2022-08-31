@@ -27,7 +27,7 @@ mod tests {
         .await;
 
         let req = test::TestRequest::put()
-            .uri("/brands/17")
+            .uri("/brands/100")
             .set_json(&NewBrand {
                 name: "test update".to_string(),
                 description: "test update".to_string(),
@@ -106,7 +106,7 @@ mod tests {
         )
         .await;
 
-        let req = test::TestRequest::with_uri("/brands/17").to_request();
+        let req = test::TestRequest::with_uri("/brands/100").to_request();
         let res = app.call(req).await.unwrap();
         assert_eq!(res.status(), StatusCode::OK);
     }

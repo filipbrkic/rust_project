@@ -8,7 +8,7 @@ pub async fn get_owners_by_id(
     path: web::Path<u32>,
     pool: web::Data<DbPool>,
 ) -> Result<impl Responder, Error> {
-    let mut connection = pool.get().expect("Couldn't get db connection from pool");
+    let mut connection = pool.get().unwrap();
 
     use crate::diesel::QueryDsl;
     use crate::schema::owners::dsl::owners;
@@ -30,7 +30,7 @@ pub async fn get_owners_by_id(
 
 #[get("/owners")]
 pub async fn get_owners(pool: web::Data<DbPool>) -> Result<impl Responder, Error> {
-    let mut connection = pool.get().expect("Couldn't get db connection from pool");
+    let mut connection = pool.get().unwrap();
 
     use crate::schema::owners::dsl::owners;
 
@@ -50,7 +50,7 @@ pub async fn post_owners(
     info: web::Json<NewOwner>,
     pool: web::Data<DbPool>,
 ) -> Result<impl Responder, Error> {
-    let mut connection = pool.get().expect("Couldn't get db connection from pool");
+    let mut connection = pool.get().unwrap();
 
     let new_owners = NewOwners {
         first_name: &info.first_name,
@@ -73,7 +73,7 @@ pub async fn update_owners(
     info: web::Json<NewOwner>,
     pool: web::Data<DbPool>,
 ) -> Result<impl Responder, Error> {
-    let mut connection = pool.get().expect("Couldn't get db connection from pool");
+    let mut connection = pool.get().unwrap();
 
     let path_to_string = &path.into_inner().to_string();
     let id = &path_to_string.parse::<i32>().unwrap();
@@ -102,7 +102,7 @@ pub async fn delete_owners(
     path: web::Path<u32>,
     pool: web::Data<DbPool>,
 ) -> Result<impl Responder, Error> {
-    let mut connection = pool.get().expect("Couldn't get db connection from pool");
+    let mut connection = pool.get().unwrap();
 
     let path_to_string = &path.into_inner().to_string();
     let id = &path_to_string.parse::<i32>().unwrap();
