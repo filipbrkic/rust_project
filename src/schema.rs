@@ -22,4 +22,8 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(owners, vehicle_brands, vehicle_models,);
+allow_tables_to_appear_in_same_query!(
+    owners,
+    vehicle_brands,
+    vehicle_models,
+);
