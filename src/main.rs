@@ -22,9 +22,7 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    println!("1");
     let manager = ConnectionManager::<PgConnection>::new(database_url);
-    println!("2");
     let pool = r2d2::Pool::builder()
         .build(manager)
         .expect("Failed to create pool.");
